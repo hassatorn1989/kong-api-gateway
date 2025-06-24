@@ -54,6 +54,25 @@ services:
       - "8001:8001"   # Admin API
     restart: always
 
+  konga-database:
+    image: mariadb:10
+    container_name: konga-database
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: konga
+      MYSQL_USER: konga
+      MYSQL_PASSWORD: konga
+    networks:
+      - kong-net
+    volumes:
+      - ./konga-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   konga-ui:
     image: pantsel/konga:latest
     container_name: konga-ui
@@ -62,8 +81,16 @@ services:
     depends_on:
       - kong-gateway
       - kong-database
+      - konga-database:
+          condition: service_healthy
     environment:
       NODE_ENV: production
+      DB_ADAPTER: mysql
+      DB_HOST: konga-database
+      DB_PORT: 3306
+      DB_USER: konga
+      DB_PASSWORD: konga
+      DB_DATABASE: konga
     ports:
       - "1337:1337"
     restart: always
@@ -96,3 +123,4 @@ volumes:
 networks:
   kong-net:
     driver: bridge
+    name: kong-net
