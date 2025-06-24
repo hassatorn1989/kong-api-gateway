@@ -1,0 +1,36 @@
+_format_version: "3.0"
+
+services:
+  # add user-service
+  - name: user-service
+    url: http://user-service:3001
+    routes:
+      - name: user-service-route
+        strip_path: true
+        host: user-service
+        methods:
+          - GET
+        protocols:
+          - http
+        paths:
+          - /users
+
+  # add product-service
+  - name: product-service
+    url: http://product-service:4001
+    routes:
+      - name: product-service-route
+        paths:
+          - /products
+
+# consumers:
+#   - username: testuser
+#     custom_id: 123
+
+# jwt_secrets:
+#   - consumer: testuser
+#     key: my_public_key
+#     secret: my_secret_key
+#     algorithm: HS256
+
+
